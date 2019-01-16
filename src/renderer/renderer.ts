@@ -7,7 +7,7 @@ import parseFurigana from "./plugins/furigana"
 
 import "simplemde/dist/simplemde.min.css"
 
-const { app, dialog, process } = remote;
+const { app, dialog } = remote;
 
 let promptOnSave = true;
 let currentFile = url.parse(location.href, true).query.file as string || "~";
@@ -18,6 +18,29 @@ const mde = new SimpleMDE({
         return parseFurigana(md.render(plainText));
     },
     spellChecker: false,
+    toolbar: [
+        "bold", "italic", "heading", "|", 
+        "quote", "unordered-list", "ordered-list", "|",
+        "link", "image", "|",
+        "preview", "side-by-side", "fullscreen", "|",
+        {
+            name: "open",
+			action(editor){
+				openFile()
+			},
+			className: "fa fa-folder-open-o",
+			title: "Open new file",
+        },
+        {
+            name: "save",
+			action(editor){
+				saveFile()
+			},
+			className: "fa fa-save",
+			title: "Save file",
+        },
+        "|", "guide"
+    ]
 });
 
 SimpleMDE.toggleSideBySide(mde);
@@ -31,35 +54,7 @@ document.addEventListener("keydown", (e) => {
     if (e.metaKey || e.ctrlKey) {
         if (e.key === "s") {
             e.preventDefault();
-
-            if (promptOnSave) {
-                dialog.showMessageBox({
-                    type: "question",
-                    message: "Do you want to save?",
-                    buttons: ["Yes", "Cancel"],
-                    defaultId: 0,
-                    checkboxLabel: "Remember save location",
-                    checkboxChecked: true
-                }, (response, checked) => {
-                    if (response === 0) {
-                        promptOnSave = !checked;
-                        const file = dialog.showSaveDialog({
-                            defaultPath: currentFile,
-                            filters: [{
-                                name: "Markdown files",
-                                extensions: ["md"],
-                            }]
-                        });
-    
-                        if (file !== undefined) {
-                            currentFile = file;
-                            saveFile();
-                        }
-                    }
-                });
-            } else {
-                saveFile();
-            }
+            saveFile();
         } else if (e.key === "o") {
             openFile();
         }
@@ -78,14 +73,8 @@ function openFile() {
 
     if (file !== undefined) {
         currentFile = file[0];
-    }
-    console.log(currentFile);
-
-    if (currentFile === "~") {
-        app.quit();
-    } else {
         readFile();
-    }
+    }  
 }
 
 function readFile() {
@@ -101,6 +90,37 @@ function readFile() {
 }
 
 function saveFile() {
+    if (promptOnSave) {
+        dialog.showMessageBox({
+            type: "question",
+            message: "Do you want to save?",
+            buttons: ["Yes", "Cancel"],
+            defaultId: 0,
+            checkboxLabel: "Remember save location",
+            checkboxChecked: true
+        }, (response, checked) => {
+            if (response === 0) {
+                const file = dialog.showSaveDialog({
+                    defaultPath: currentFile,
+                    filters: [{
+                        name: "Markdown files",
+                        extensions: ["md"],
+                    }]
+                });
+    
+                if (file !== undefined) {
+                    currentFile = file;
+                    promptOnSave = !checked;
+                    saveFileSilent();
+                }
+            }
+        });
+    } else {
+        saveFileSilent();
+    }
+}
+
+function saveFileSilent() {
     fs.writeFile(currentFile, mde.value(), (err) => {
         if (err) {
             return console.log(err);
