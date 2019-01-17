@@ -15,22 +15,9 @@ let currentFile = url.parse(location.href, true).query.file as string || "~";
 let currentContent = "";
 
 ipcRenderer.on("on-app-closing", () => {
-    if (mde.value() !== currentContent) {
-        dialog.showMessageBox({
-            type: "question",
-            message: "Do you want to save before closing?",
-            buttons: ["Yes", "No", "Cancel"],
-            defaultId: 0,
-        }, (response) => {
-            if (response === 0) {
-                saveFile()
-            } else if (response === 1) {
-                ipcRenderer.send("quitter");
-            }
-        })
-    } else {
+    saveBeforeFunction(() => {
         ipcRenderer.send("quitter");
-    }
+    })
 })
 
 const md = MarkdownIt();
@@ -47,25 +34,33 @@ const mde = new SimpleMDE({
             },
             title: "Add furigana",
             innerHTML: "<b>ふ</b>"
-        }, "|", 
+        }, "|",
         "quote", "unordered-list", "ordered-list", "|",
         "link", "image", "|",
         "preview", "side-by-side", "fullscreen", "|",
         {
+            name: "newFile",
+            action(editor) {
+                newFile();
+            },
+            className: "fa fa-plus",
+            title: "New markdown file",
+        },
+        {
             name: "open",
-			action(editor){
-				openFile();
-			},
-			className: "fa fa-folder-open-o",
-			title: "Open new file",
+            action(editor) {
+                openFile();
+            },
+            className: "fa fa-folder-open-o",
+            title: "Open new file",
         },
         {
             name: "save",
-			action(editor){
-				saveFile();
-			},
-			className: "fa fa-save",
-			title: "Save file",
+            action(editor) {
+                saveFile();
+            },
+            className: "fa fa-save",
+            title: "Save file",
         },
         {
             name: "export",
@@ -110,14 +105,24 @@ function openFile() {
     if (file !== undefined) {
         currentFile = file[0];
         readFile();
-    }  
+    }
 }
 
 function setTitle() {
     document.getElementsByTagName("title")[0].innerText = "OpenMDE - " + currentFile;
 }
 
+function newFile() {
+    saveBeforeFunction(() => {
+        promptOnSave = true;
+        currentFile = "~";
+        currentContent = "";
+        mde.value(currentContent);
+    });
+}
+
 function readFile() {
+    promptOnSave = true;
     fs.readFile(currentFile, "utf-8", (err, data) => {
         if (err) {
             dialog.showMessageBox({
@@ -148,7 +153,7 @@ function saveFile(quitAfterSaving = false) {
                         extensions: ["md"],
                     }]
                 });
-    
+
                 if (file !== undefined) {
                     currentFile = file;
                     setTitle();
@@ -167,11 +172,32 @@ function saveFile(quitAfterSaving = false) {
 }
 
 function saveFileSilent() {
-    fs.writeFile(currentFile, mde.value(), (err) => {
+    currentContent = mde.value();
+    fs.writeFile(currentFile, currentContent, (err) => {
         if (err) {
             return console.log(err);
         }
     })
+}
+
+function saveBeforeFunction(fn: () => void) {
+    if (mde.value() !== currentContent) {
+        dialog.showMessageBox({
+            type: "question",
+            message: "Do you want to save first?",
+            buttons: ["Yes", "No", "Cancel"],
+            defaultId: 0,
+        }, (response) => {
+            if (response === 0) {
+                saveFile()
+                fn();
+            } else if (response === 1) {
+                fn();
+            }
+        })
+    } else {
+        fn();
+    }
 }
 
 function exportFile() {

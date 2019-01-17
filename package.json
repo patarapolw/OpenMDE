@@ -1,6 +1,6 @@
 {
   "name": "OpenMDE",
-  "version": "1.0.0",
+  "version": "1.0.1-beta1",
   "description": "SimpleMDE markdown editor that can double-click to open files",
   "main": "dist/main.bundle.js",
   "author": "Pacharapol Withayasakpunt",
