@@ -4,17 +4,37 @@ import MarkdownIt from "markdown-it";
 // @ts-ignore
 import MdAdmonition from "markdown-it-admonition";
 import SimpleMDE from "./simplemde";
+import toastr from "toastr";
 import url from "url";
 import parseFurigana from "./plugins/furigana"
 
 import "./index.css"
 import "simplemde/dist/simplemde.min.css"
+import "toastr/build/toastr.min.css"
 
 const { dialog } = remote;
 
 let promptOnSave = true;
 let currentFile = url.parse(location.href, true).query.file as string || "~";
 let currentContent = "";
+
+toastr.options = {
+    "closeButton": true,
+    "debug": false,
+    "newestOnTop": false,
+    "progressBar": false,
+    "positionClass": "toast-bottom-center",
+    "preventDuplicates": false,
+    "onclick": null,
+    "showDuration": 300,
+    "hideDuration": 1000,
+    "timeOut": 5000,
+    "extendedTimeOut": 1000,
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
+  }
 
 ipcRenderer.on("on-app-closing", () => {
     saveBeforeFunction(() => {
@@ -79,6 +99,10 @@ const mde = new SimpleMDE({
 SimpleMDE.toggleSideBySide(mde);
 SimpleMDE.toggleFullScreen(mde);
 
+mde.codemirror.on("change", () => {
+    setTitle();
+})
+
 if (currentFile !== "~") {
     readFile();
 }
@@ -110,16 +134,30 @@ function openFile() {
     }
 }
 
-function setTitle() {
-    document.getElementsByTagName("title")[0].innerText = "OpenMDE - " + currentFile;
+function setTitle(_currentFile: string = null) {
+    if (_currentFile) {
+        currentFile = _currentFile;
+    }
+
+    let title = "OpenMDE - ";
+    if (currentFile === "~") {
+        title += "New file";
+    } else {
+        title += currentFile;
+    }
+
+    if (mde.value() !== currentContent) {
+        title += "*";
+    }
+
+    document.getElementsByTagName("title")[0].innerText = title;
 }
 
 function newFile() {
     saveBeforeFunction(() => {
         promptOnSave = true;
-        currentFile = "~";
+        setTitle("~");
         currentContent = "";
-        document.getElementsByTagName("title")[0].innerText = "OpenMDE";
         mde.value(currentContent);
     });
 }
@@ -132,9 +170,11 @@ function readFile() {
                 type: "error",
                 message: "An error ocurred reading the file :" + err.message,
             });
+        } else {
+            currentContent = data;
+            mde.value(data)
+            setTitle(currentFile);
         }
-        setTitle();
-        mde.value(data)
     });
 }
 
@@ -159,7 +199,6 @@ function saveFile(quitAfterSaving = false) {
 
                 if (file !== undefined) {
                     currentFile = file;
-                    setTitle();
                     promptOnSave = !checked;
                     saveFileSilent();
 
@@ -179,6 +218,9 @@ function saveFileSilent() {
     fs.writeFile(currentFile, currentContent, (err) => {
         if (err) {
             return console.log(err);
+        } else {
+            setTitle(currentFile);
+            toastr["success"]("Saved!");
         }
     })
 }

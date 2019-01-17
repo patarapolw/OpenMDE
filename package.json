@@ -1,6 +1,6 @@
 {
   "name": "OpenMDE",
-  "version": "1.0.1-beta1",
+  "version": "1.0.1-beta2",
   "description": "SimpleMDE markdown editor that can double-click to open files",
   "main": "dist/main.bundle.js",
   "author": "Pacharapol Withayasakpunt",
@@ -8,6 +8,7 @@
   "devDependencies": {
     "@types/markdown-it": "^0.0.7",
     "@types/simplemde": "^1.11.7",
+    "@types/toastr": "^2.1.35",
     "css-loader": "^2.1.0",
     "electron": "4.0.1",
     "electron-builder": "^20.38.5",
@@ -23,20 +24,17 @@
     "webpack-cli": "^3.2.1"
   },
   "dependencies": {
-    "docarys": "^2.0.3",
-    "docarys-material": "^2.0.2",
     "electron-is-running-in-asar": "^1.0.0",
-    "generator-docarys": "^2.0.0",
     "markdown-it": "^8.4.2",
     "markdown-it-admonition": "^1.0.4",
-    "simplemde": "^1.11.2"
+    "simplemde": "^1.11.2",
+    "toastr": "^2.1.4"
   },
   "scripts": {
     "start": "electron ./dist/main.bundle.js",
     "dev": "rimraf dist && webpack --watch --config ./webpack.dev.js --progress --colors",
     "compile": "rimraf dist && webpack --config ./webpack.prod.js --progress --colors",
-    "build": "rimraf build && yarn run compile && electron-builder",
-    "docarys": "yo docarys"
+    "build": "rimraf build && yarn run compile && electron-builder"
   },
   "build": {
     "appId": "io.github.patarapolw.openmde",
