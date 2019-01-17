@@ -1,0 +1,10 @@
+.fas.fa-file-export {
+    background-image: url("icons/file-export-solid.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-position-y: 0.2em;
+    height: 1em;
+    width: 1em;
+    border: 0;
+}

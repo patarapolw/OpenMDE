@@ -5,10 +5,10 @@ import SimpleMDE from "./simplemde";
 import url from "url";
 import parseFurigana from "./plugins/furigana"
 
-import "@fortawesome/fontawesome-free/css/all.css"
+import "./index.css"
 import "simplemde/dist/simplemde.min.css"
 
-const { app, dialog } = remote;
+const { dialog } = remote;
 
 let promptOnSave = true;
 let currentFile = url.parse(location.href, true).query.file as string || "~";
@@ -52,8 +52,8 @@ const mde = new SimpleMDE({
             action(editor) {
                 exportFile();
             },
-            className: "fas fa-file-export",
             title: "Export to HTML",
+            innerHTML: `<img class='fas fa-file-export' src=# />`
         },
         "|", "guide"
     ]

@@ -26,6 +26,9 @@ function createWindow(filePath: string = "~") {
     mainWindow = new BrowserWindow({
         height: 768,
         width: 1024,
+        webPreferences: {
+            nodeIntegration: true,
+        }
     });
     mainWindow.maximize();
 

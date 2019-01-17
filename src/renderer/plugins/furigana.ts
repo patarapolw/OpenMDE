@@ -1,33 +1,24 @@
 const kanjiRegexStr = "(?:\\{|\\｛)([^\\}\\｝]+)(?:\\}|\\｝)(?:\\（|\\()([^\\}\\｝]+)(?:\\）|\\))";
-const patternRegex = new RegExp(`(?:${kanjiRegexStr}.*)+`, "g");
 const kanjiRegex = new RegExp(kanjiRegexStr, "g");
 
 function parseFurigana(text: string) {
-    let match = patternRegex.exec(text);
+    let match;
 
-    while (match) {
+    while (match = kanjiRegex.exec(text)) {
         const html = ["<ruby>"];
         const phrase = match[0];
-        console.log(phrase)
+        
+        let kanji = match[1];
+        let reading = match[2];
 
-        let secondMatch = kanjiRegex.exec(phrase);
-        while (secondMatch) {
-            console.log(secondMatch)
-            const kanji = secondMatch[1];
-            const reading = secondMatch[2];
-
-            html.push(kanji);
-            html.push("<rt>");
-            html.push(reading);
-            html.push("</rt>");
-
-            secondMatch = kanjiRegex.exec(phrase)
-        }
+        html.push(kanji);
+        html.push("<rt>");
+        html.push(reading);
+        html.push("</rt>");
 
         html.push("</ruby>");
 
-        text = match.input.replace(phrase, html.join(""));
-        match = patternRegex.exec(text)
+        text = text.replace(phrase, html.join(""));
     }
 
     return text;
