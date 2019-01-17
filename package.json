@@ -23,15 +23,20 @@
     "webpack-cli": "^3.2.1"
   },
   "dependencies": {
+    "docarys": "^2.0.3",
+    "docarys-material": "^2.0.2",
     "electron-is-running-in-asar": "^1.0.0",
+    "generator-docarys": "^2.0.0",
     "markdown-it": "^8.4.2",
+    "markdown-it-admonition": "^1.0.4",
     "simplemde": "^1.11.2"
   },
   "scripts": {
     "start": "electron ./dist/main.bundle.js",
     "dev": "rimraf dist && webpack --watch --config ./webpack.dev.js --progress --colors",
     "compile": "rimraf dist && webpack --config ./webpack.prod.js --progress --colors",
-    "build": "rimraf build && yarn run compile && electron-builder"
+    "build": "rimraf build && yarn run compile && electron-builder",
+    "docarys": "yo docarys"
   },
   "build": {
     "appId": "io.github.patarapolw.openmde",
@@ -42,10 +47,12 @@
       "category": "public.app-category.utilities",
       "icon": "icon.png"
     },
-    "fileAssociations": [{
-      "ext": "md",
-      "role": "Editor"
-    }],
+    "fileAssociations": [
+      {
+        "ext": "md",
+        "role": "Editor"
+      }
+    ],
     "files": [
       "dist/**/*",
       "package.json"

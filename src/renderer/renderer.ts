@@ -1,6 +1,8 @@
 import { ipcRenderer, remote } from "electron";
 import fs from "fs";
 import MarkdownIt from "markdown-it";
+// @ts-ignore
+import MdAdmonition from "markdown-it-admonition";
 import SimpleMDE from "./simplemde";
 import url from "url";
 import parseFurigana from "./plugins/furigana"
@@ -20,7 +22,7 @@ ipcRenderer.on("on-app-closing", () => {
     })
 })
 
-const md = MarkdownIt();
+const md = MarkdownIt().use(MdAdmonition);
 const mde = new SimpleMDE({
     previewRender: markdownToHtml,
     spellChecker: false,
@@ -117,6 +119,7 @@ function newFile() {
         promptOnSave = true;
         currentFile = "~";
         currentContent = "";
+        document.getElementsByTagName("title")[0].innerText = "OpenMDE";
         mde.value(currentContent);
     });
 }
@@ -201,6 +204,9 @@ function saveBeforeFunction(fn: () => void) {
 }
 
 function exportFile() {
+    const html = markdownToHtml(mde.value());
+    console.log(html);
+
     const file = dialog.showSaveDialog({
         defaultPath: currentFile,
         filters: [{
@@ -210,7 +216,7 @@ function exportFile() {
     });
 
     if (file !== undefined) {
-        fs.writeFile(file, markdownToHtml(mde.value()), (err) => {
+        fs.writeFile(file, html, (err) => {
             if (err) {
                 return console.log(err);
             }

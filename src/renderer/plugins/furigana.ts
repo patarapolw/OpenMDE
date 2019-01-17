@@ -1,4 +1,4 @@
-const kanjiRegexStr = "(?:\\{|\\｛)([^\\}\\｝]+)(?:\\}|\\｝)(?:\\（|\\()([^\\}\\｝]+)(?:\\）|\\))";
+const kanjiRegexStr = "(?:\\{|\\｛)([^\\}\\｝]+)(?:\\}|\\｝)(?:\\（|\\()([^\\）\\)]+)(?:\\）|\\))";
 const kanjiRegex = new RegExp(kanjiRegexStr, "g");
 
 function parseFurigana(text: string) {

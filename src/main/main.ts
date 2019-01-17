@@ -1,10 +1,7 @@
-import { app, BrowserWindow, ipcMain, protocol } from 'electron';
-// import reload from "electron-reload";
+import { app, BrowserWindow, ipcMain, Menu, protocol } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 import isAsar from "electron-is-running-in-asar";
-
-// reload(path.join(__dirname, '../../dist'))
 
 let mainWindow: Electron.BrowserWindow;
 let openedFilePath: string;
@@ -79,6 +76,28 @@ app.on('ready', () => {
     })
 
     createWindow(openedFilePath);
+
+    var template = [{
+        label: "Application",
+        submenu: [
+            { label: "About Application", selector: "orderFrontStandardAboutPanel:" },
+            { type: "separator" },
+            { label: "Quit", accelerator: "Command+Q", click: function() { app.quit(); }}
+        ]}, {
+        label: "Edit",
+        submenu: [
+            { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
+            { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
+            { type: "separator" },
+            { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
+            { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
+            { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+            { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
+        ]}
+    ];
+
+    // @ts-ignore
+    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 });
 
 app.on('window-all-closed', () => {
