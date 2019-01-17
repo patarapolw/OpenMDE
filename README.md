@@ -22,6 +22,7 @@ Executables can be downloaded from <https://github.com/patarapolw/OpenMDE/releas
     - `yarn run dev` to start development server
     - `yarn start` to start Electron app
 
-## Disclaimer
+## Screenshots
 
-<div>Icons made by <a href="https://www.flaticon.com/authors/roundicons" title="Roundicons">Roundicons</a> from <a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" 			    title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+![](/screenshots/file_browser.png)
+![](/screenshots/screen.png)

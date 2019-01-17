@@ -1,4 +1,4 @@
-import { app, BrowserWindow, protocol } from 'electron';
+import { app, BrowserWindow, ipcMain, protocol } from 'electron';
 // import reload from "electron-reload";
 import * as path from 'path';
 import * as url from 'url';
@@ -8,6 +8,7 @@ import isAsar from "electron-is-running-in-asar";
 
 let mainWindow: Electron.BrowserWindow;
 let openedFilePath: string;
+let showExitPrompt = true;
 
 function setFilePath(filePath: string) {
     mainWindow.loadURL(
@@ -38,10 +39,24 @@ function createWindow(filePath: string = "~") {
         mainWindow.webContents.openDevTools();
     }
 
+    mainWindow.on("close", (e) => {
+        if (showExitPrompt) {
+            e.preventDefault();
+            mainWindow.webContents.send("on-app-closing");
+        }
+    })
+
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
 }
+
+ipcMain.on("quitter", () => {
+    if (mainWindow !== null) {
+        showExitPrompt = false;
+        mainWindow.close();
+    }
+})
 
 app.on("will-finish-launching", () => {
     app.on("open-file", (e, path) => {
@@ -59,16 +74,16 @@ app.on('ready', () => {
     protocol.registerFileProtocol('atom', (request, callback) => {
         const url = request.url.substr(7)
         callback(path.normalize(`${__dirname}/${url}`))
-      }, (error) => {
+    }, (error) => {
         if (error) console.error('Failed to register protocol')
-      })
+    })
 
     createWindow(openedFilePath);
 });
 
 app.on('window-all-closed', () => {
     // if (process.platform !== 'darwin') {
-        app.quit();
+    app.quit();
     // }
 });
 

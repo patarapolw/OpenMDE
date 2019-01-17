@@ -1,4 +1,4 @@
-import { remote } from "electron";
+import { ipcRenderer, remote } from "electron";
 import fs from "fs";
 import MarkdownIt from "markdown-it";
 import SimpleMDE from "./simplemde";
@@ -12,6 +12,26 @@ const { dialog } = remote;
 
 let promptOnSave = true;
 let currentFile = url.parse(location.href, true).query.file as string || "~";
+let currentContent = "";
+
+ipcRenderer.on("on-app-closing", () => {
+    if (mde.value() !== currentContent) {
+        dialog.showMessageBox({
+            type: "question",
+            message: "Do you want to save before closing?",
+            buttons: ["Yes", "No", "Cancel"],
+            defaultId: 0,
+        }, (response) => {
+            if (response === 0) {
+                saveFile()
+            } else if (response === 1) {
+                ipcRenderer.send("quitter");
+            }
+        })
+    } else {
+        ipcRenderer.send("quitter");
+    }
+})
 
 const md = MarkdownIt();
 const mde = new SimpleMDE({
@@ -93,6 +113,10 @@ function openFile() {
     }  
 }
 
+function setTitle() {
+    document.getElementsByTagName("title")[0].innerText = "OpenMDE - " + currentFile;
+}
+
 function readFile() {
     fs.readFile(currentFile, "utf-8", (err, data) => {
         if (err) {
@@ -101,11 +125,12 @@ function readFile() {
                 message: "An error ocurred reading the file :" + err.message,
             });
         }
+        setTitle();
         mde.value(data)
     });
 }
 
-function saveFile() {
+function saveFile(quitAfterSaving = false) {
     if (promptOnSave) {
         dialog.showMessageBox({
             type: "question",
@@ -126,8 +151,13 @@ function saveFile() {
     
                 if (file !== undefined) {
                     currentFile = file;
+                    setTitle();
                     promptOnSave = !checked;
                     saveFileSilent();
+
+                    if (quitAfterSaving) {
+                        ipcRenderer.send("quitter");
+                    }
                 }
             }
         });
