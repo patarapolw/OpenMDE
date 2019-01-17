@@ -1,7 +1,10 @@
 import { app, BrowserWindow, protocol } from 'electron';
+// import reload from "electron-reload";
 import * as path from 'path';
 import * as url from 'url';
 import isAsar from "electron-is-running-in-asar";
+
+// reload(path.join(__dirname, '../../dist'))
 
 let mainWindow: Electron.BrowserWindow;
 let openedFilePath: string;

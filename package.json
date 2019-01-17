@@ -23,6 +23,7 @@
     "webpack-cli": "^3.2.1"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.6.3",
     "electron-is-running-in-asar": "^1.0.0",
     "markdown-it": "^8.4.2",
     "simplemde": "^1.11.2"

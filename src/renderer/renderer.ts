@@ -1,10 +1,11 @@
 import { remote } from "electron";
 import fs from "fs";
 import MarkdownIt from "markdown-it";
-import SimpleMDE from "simplemde";
+import SimpleMDE from "./simplemde";
 import url from "url";
 import parseFurigana from "./plugins/furigana"
 
+import "@fortawesome/fontawesome-free/css/all.css"
 import "simplemde/dist/simplemde.min.css"
 
 const { app, dialog } = remote;
@@ -14,19 +15,26 @@ let currentFile = url.parse(location.href, true).query.file as string || "~";
 
 const md = MarkdownIt();
 const mde = new SimpleMDE({
-    previewRender(plainText) {
-        return parseFurigana(md.render(plainText));
-    },
+    previewRender: markdownToHtml,
     spellChecker: false,
     toolbar: [
-        "bold", "italic", "heading", "|", 
+        "bold", "italic", "heading", {
+            name: "furigana",
+            action(editor) {
+                const cm = editor.codemirror;
+                const s = cm.getSelection();
+                cm.replaceSelection(`{${s}}()`);
+            },
+            title: "Add furigana",
+            innerHTML: "<b>ふ</b>"
+        }, "|", 
         "quote", "unordered-list", "ordered-list", "|",
         "link", "image", "|",
         "preview", "side-by-side", "fullscreen", "|",
         {
             name: "open",
 			action(editor){
-				openFile()
+				openFile();
 			},
 			className: "fa fa-folder-open-o",
 			title: "Open new file",
@@ -34,10 +42,18 @@ const mde = new SimpleMDE({
         {
             name: "save",
 			action(editor){
-				saveFile()
+				saveFile();
 			},
 			className: "fa fa-save",
 			title: "Save file",
+        },
+        {
+            name: "export",
+            action(editor) {
+                exportFile();
+            },
+            className: "fas fa-file-export",
+            title: "Export to HTML",
         },
         "|", "guide"
     ]
@@ -126,4 +142,26 @@ function saveFileSilent() {
             return console.log(err);
         }
     })
+}
+
+function exportFile() {
+    const file = dialog.showSaveDialog({
+        defaultPath: currentFile,
+        filters: [{
+            name: "HTML files",
+            extensions: ["html", "htm"],
+        }]
+    });
+
+    if (file !== undefined) {
+        fs.writeFile(file, markdownToHtml(mde.value()), (err) => {
+            if (err) {
+                return console.log(err);
+            }
+        })
+    }
+}
+
+function markdownToHtml(mdText: string) {
+    return parseFurigana(md.render(mdText));
 }
