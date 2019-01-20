@@ -26,3 +26,7 @@ Executables can be downloaded from <https://github.com/patarapolw/OpenMDE/releas
 
 ![](/screenshots/file_browser.png)
 ![](/screenshots/screen.png)
+
+## How was this made?
+
+I followed this <https://taraksharma.com/setting-up-electron-typescript-react-webpack/>, which was very recently created (2018-05-17), with a little tweaking for non-react.
